@@ -58,7 +58,7 @@ if subprocess.call(args) != 0:
 
 print("TAR file created")
 
-# Step x : Change back to current dir
+# Step x : Change back to current dir to prevent keeping the snapshot busy
 os.chdir(cur_dir)
 
 # Step x : Unmount the backup location
@@ -69,9 +69,6 @@ if BACKUP_MOUNT_POINT:
         sys.exit(1)
 
     print("Backup location unmounted")
-
-# Step x : Wait until snapshot device is not busy anymore
-time.sleep(60)
 
 # Step x : Unmount the snapshot
 args = ["umount", VOLUME_GROUP + "/" + SNAPSHOT_NAME]
