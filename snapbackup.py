@@ -46,6 +46,7 @@ if BACKUP_MOUNT_POINT:
     print("Backup location mounted at " + BACKUP_MOUNT_POINT)
     
 # Step 4 : Change to the backup source folder
+cur_dir = os.path.abspath(os.path.curdir)
 os.chdir(BACKUP_SOURCE)
 
 # Step 5 : Create TAR
@@ -56,6 +57,9 @@ if subprocess.call(args) != 0:
     sys.exit(1)
 
 print("TAR file created")
+
+# Step x : Change back to current dir
+os.chdir(cur_dir)
 
 # Step x : Unmount the backup location
 if BACKUP_MOUNT_POINT:
