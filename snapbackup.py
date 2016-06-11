@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import time
 
 SNAPSHOT_SIZE="1024M"
 SNAPSHOT_NAME="snap"
@@ -64,6 +65,9 @@ if BACKUP_MOUNT_POINT:
         sys.exit(1)
 
     print("Backup location unmounted")
+
+# Step x : Wait until snapshot device is not busy anymore
+time.sleep(60)
 
 # Step x : Unmount the snapshot
 args = ["umount", VOLUME_GROUP + "/" + SNAPSHOT_NAME]
