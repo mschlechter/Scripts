@@ -63,7 +63,7 @@ if BACKUP_MOUNT_POINT:
         print("Unmounting the backup location failed.")
         sys.exit(1)
 
-    print("Backup location mounted at " + BACKUP_MOUNT_POINT)
+    print("Backup location unmounted")
 
 # Step x : Unmount the snapshot
 args = ["umount", VOLUME_GROUP + "/" + SNAPSHOT_NAME]
