@@ -6,21 +6,22 @@ import sys
 import os
 import shutil
 import subprocess
-import tempfile
+import datetime
 import time
 
-SNAPSHOT_SIZE="1024M"
-SNAPSHOT_NAME="snap"
 VOLUME_GROUP="/dev/pluto-vg"
 LOGICAL_VOLUME="root"
-MOUNT_POINT="/mnt/snap"
+
+SNAPSHOT_NAME="snap"
+SNAPSHOT_MOUNT_POINT="/mnt/snap"
+SNAPSHOT_SIZE="1024M"
 
 BACKUP_MOUNT_POINT="/mnt/backup"
 BACKUP_SOURCE="/mnt/snap/home/marc"
 BACKUP_DEST="/mnt/backup"
-BACKUP_NAME="HomeBackup"
+BACKUP_ARCHIVE_NAME="HomeBackup"
 
-# Step 1 : Create the snapshot volume
+# 1. Create the snapshot volume
 args = ["lvcreate", "-L" + SNAPSHOT_SIZE, "-s", "-n", SNAPSHOT_NAME, VOLUME_GROUP + "/" + LOGICAL_VOLUME]
 if subprocess.call(args) != 0:
     print("Snapshot creation failed.")
@@ -28,15 +29,15 @@ if subprocess.call(args) != 0:
 
 print("Created snapshot of " + VOLUME_GROUP + "/" + LOGICAL_VOLUME)
 
-# Step 2 : Mount the snapshot
-args = ["mount", VOLUME_GROUP + "/" + SNAPSHOT_NAME, MOUNT_POINT, "-o", "ro"]
+# 2. Mount the snapshot
+args = ["mount", VOLUME_GROUP + "/" + SNAPSHOT_NAME, SNAPSHOT_MOUNT_POINT, "-o", "ro"]
 if subprocess.call(args) != 0:
     print("Mounting the snapshot failed.")
     sys.exit(1)
 
-print("Snapshot mounted at " + MOUNT_POINT)
+print("Snapshot mounted at " + SNAPSHOT_MOUNT_POINT)
 
-# Step 3 : Mount backup location
+# 3. Mount backup location
 if BACKUP_MOUNT_POINT:
     args = ["mount", BACKUP_MOUNT_POINT]
     if subprocess.call(args) != 0:
@@ -45,23 +46,24 @@ if BACKUP_MOUNT_POINT:
 
     print("Backup location mounted at " + BACKUP_MOUNT_POINT)
     
-# Step 4 : Change to the backup source folder
+# 4. Change to the backup source folder
 cur_dir = os.path.abspath(os.path.curdir)
 os.chdir(BACKUP_SOURCE)
 
-# Step 5 : Create TAR
-tarfile = os.path.join(BACKUP_DEST, BACKUP_NAME + ".tar.gz")
+# 5. Create backup archive
+today = datetime.date.today().strftime("%Y%m%d")
+tarfile = os.path.join(BACKUP_DEST, BACKUP_ARCHIVE_NAME) + today + ".tar.gz"
 args = ["tar", "cfz", tarfile, BACKUP_SOURCE]
 if subprocess.call(args) != 0:
-    print("Create TAR file failed.")
+    print("Create backup archive failed.")
     sys.exit(1)
 
-print("TAR file created")
+print("Backup archive " + tarfile + " created")
 
-# Step x : Change back to current dir to prevent keeping the snapshot busy
+# 6. Change back to current dir to prevent keeping the snapshot busy
 os.chdir(cur_dir)
 
-# Step x : Unmount the backup location
+# 7. Unmount the backup location
 if BACKUP_MOUNT_POINT:
     args = ["umount", BACKUP_MOUNT_POINT]
     if subprocess.call(args) != 0:
@@ -70,7 +72,7 @@ if BACKUP_MOUNT_POINT:
 
     print("Backup location unmounted")
 
-# Step x : Unmount the snapshot
+# 8. Unmount the snapshot
 args = ["umount", VOLUME_GROUP + "/" + SNAPSHOT_NAME]
 if subprocess.call(args) != 0:
     print("Unmounting the snapshot failed.")
@@ -78,7 +80,7 @@ if subprocess.call(args) != 0:
 
 print("Snapshot unmounted")
 
-# Step x : Remove the snapshot
+# 9. Remove the snapshot
 args = ["lvremove", "-f", VOLUME_GROUP + "/" + SNAPSHOT_NAME]
 if subprocess.call(args) != 0:
     print("Removing the snapshot failed.")
