@@ -7,7 +7,7 @@ import socket
 # Configuration
 
 ALLOWED_HOSTNAMES = ["autotaal.mooo.com"]
-ALLOWED_ADDRESSES = ["192.168.3.0/24"]
+ALLOWED_ADDRESSES = ["192.168.2.0/24"]
 OPEN_PORTS = [22,80,3000]
 
 # End of configuration
