@@ -27,3 +27,5 @@ for ip in ALLOWED_ADDRESSES:
 print (all_ips)
 
 # todo : build firewall rules
+# http://rdstash.blogspot.nl/2013/09/allow-host-with-dynamic-ip-through.html
+# create chain and add it to the input filter
