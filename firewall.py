@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 #
 # Really simple firewall script with support for dynamic ip's
+#
+# Schedule this to run every night
 
 import socket
 
