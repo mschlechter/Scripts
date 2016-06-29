@@ -37,7 +37,7 @@ function cleanup
 		if [ $? -ne 0 ]; then die "Unmounting snapshot failed."; fi
 	fi
 
-	if $LVDISPLAY | grep $SNAPSHOT_VOLUME_NAME; then
+	if $LVDISPLAY | grep -q $SNAPSHOT_VOLUME_NAME; then
 		# Remove the snapshot
 		log "Removing snapshot for volume $VOLUME_NAME"
 		$LVREMOVE -f $VOLUME_NAME
