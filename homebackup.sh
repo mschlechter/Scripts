@@ -16,7 +16,7 @@ TAR=$(which tar)
 
 function log
 {
-	echo `date +"%Y%m%d %H:%M:%S"` "$1"
+	echo "$(date +"%Y%m%d %H:%M:%S") $1"
 }
 
 function die
