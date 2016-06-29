@@ -16,24 +16,24 @@ TAR=$(which tar)
 
 function log
 {
-	echo `date +"%Y%m%d %H:%M:%S"` $1
+	echo `date +"%Y%m%d %H:%M:%S"` "$1"
+}
+
+function die
+{
+	log "$1"
+	exit 1
 }
 
 # Create the snapshot volume
 log "Creating snapshot for volume $VOLUME_NAME"
 $LVCREATE -L $SNAPSHOT_SIZE -s -n $SNAPSHOT_NAME $VOLUME_NAME &> /dev/null
-if [ $? -ne 0 ];
-then
-	log "Snapshot creation failed."
-	exit 1
-fi
+if [ $? -ne 0 ]; then die "Snapshot creation failed."; fi
+
+
 
 # Remove the snapshot
 log "Removing snapshot for volume $VOLUME_NAME"
 $LVREMOVE -f $VOLUME_NAME &> /dev/null
-if [ $? -ne 0 ];
-then
-	log "Removing snapshot failed."
-	exit 1
-fi
+if [ $? -ne 0 ]; then die "Removing snapshot failed."; fi
 
