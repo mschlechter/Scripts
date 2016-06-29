@@ -14,21 +14,26 @@ MOUNT=$(which mount)
 UMOUNT=$(which umount)
 TAR=$(which tar)
 
+function log
+{
+	echo `date +"%Y%m%d %H:%M:%S"` $1
+}
+
 # Create the snapshot volume
-echo "Creating snapshot for volume $VOLUME_NAME"
+log "Creating snapshot for volume $VOLUME_NAME"
 $LVCREATE -L $SNAPSHOT_SIZE -s -n $SNAPSHOT_NAME $VOLUME_NAME &> /dev/null
 if [ $? -ne 0 ];
 then
-	echo "Snapshot creation failed."
+	log "Snapshot creation failed."
 	exit 1
 fi
 
 # Remove the snapshot
-echo "Removing snapshot for volume $VOLUME_NAME"
+log "Removing snapshot for volume $VOLUME_NAME"
 $LVREMOVE -f $VOLUME_NAME &> /dev/null
 if [ $? -ne 0 ];
 then
-	echo "Removing snapshot failed."
+	log "Removing snapshot failed."
 	exit 1
 fi
 
