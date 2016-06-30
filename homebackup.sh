@@ -30,30 +30,30 @@ function die
 
 function cleanup
 {
+	# Unmount snapshot filesystem (when mounted)
 	if $MOUNTPOINT -q $SNAPSHOT_MOUNT_POINT; then
-		# Unmount the snapshot
 		log "Unmounting the snapshot"
-		$UMOUNT $SNAPSHOT_VOLUME_NAME
-		if [ $? -ne 0 ]; then die "Unmounting snapshot failed."; fi
+		$UMOUNT $SNAPSHOT_VOLUME_NAME \
+			|| log "Unmounting snapshot failed."
 	fi
 
+	# Remove snapshot volume (when it exists)
 	if $LVDISPLAY | grep -q $SNAPSHOT_VOLUME_NAME; then
-		# Remove the snapshot
 		log "Removing snapshot for volume $VOLUME_NAME"
-		$LVREMOVE -f $VOLUME_NAME
-		if [ $? -ne 0 ]; then die "Removing snapshot failed."; fi
+		$LVREMOVE -f $VOLUME_NAME \
+			|| log "Removing snapshot failed."
 	fi
 }
 
 # Create the snapshot volume
 log "Creating snapshot for volume $VOLUME_NAME"
-$LVCREATE -L $SNAPSHOT_SIZE -s -n $SNAPSHOT_NAME $VOLUME_NAME
-if [ $? -ne 0 ]; then die "Snapshot creation failed."; fi
+$LVCREATE -L $SNAPSHOT_SIZE -s -n $SNAPSHOT_NAME $VOLUME_NAME \
+	|| die "Snapshot creation failed."
 
 # Mount the snapshot
 log "Mounting snapshot on $SNAPSHOT_MOUNT_POINT"
-$MOUNT $SNAPSHOT_VOLUME_NAME $SNAPSHOT_MOUNT_POINT -o ro
-if [ $? -ne 0 ]; then die "Mounting snapshot failed."; fi
+$MOUNT $SNAPSHOT_VOLUME_NAME $SNAPSHOT_MOUNT_POINT -o ro \
+	|| die "Mounting snapshot failed."
 
 # Perform cleanup
 cleanup
