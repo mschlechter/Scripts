@@ -3,6 +3,13 @@
 # Script which creates a LVM snapshot, mounts it, and then makes a
 # backup of the configured directories.
 #
+# It is recommended to use a logical volume and filesystem dedicated to
+# data. Removing a snapshot of a filesystem that is in use (for example
+# the root filesystem), might cause errors with lvremove.
+#
+# If you have a separate logical volume with one filesystem in it, this
+# script should work just fine.
+#
 
 #
 # Begin of configuration section
