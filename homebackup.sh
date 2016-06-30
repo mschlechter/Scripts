@@ -1,4 +1,12 @@
 #!/bin/bash
+#
+# Script which creates a LVM snapshot, mounts it, and then makes a
+# backup of the configured directories.
+#
+
+#
+# Begin of configuration section
+#
 
 VOLUME_GROUP="/dev/main-vg"
 VOLUME_NAME="$VOLUME_GROUP/root"
@@ -15,6 +23,10 @@ MOUNT=$(which mount)
 UMOUNT=$(which umount)
 TAR=$(which tar)
 MOUNTPOINT=$(which mountpoint)
+
+#
+# End of configuration section
+#
 
 function log
 {
@@ -45,19 +57,16 @@ function cleanup
 	fi
 }
 
-# Create the snapshot volume
+# Create snapshot volume
 log "Creating snapshot for volume $VOLUME_NAME"
 $LVCREATE -L $SNAPSHOT_SIZE -s -n $SNAPSHOT_NAME $VOLUME_NAME \
 	|| die "Snapshot creation failed."
 
-# Mount the snapshot
+# Mount snapshot filesystem
 log "Mounting snapshot on $SNAPSHOT_MOUNT_POINT"
 $MOUNT $SNAPSHOT_VOLUME_NAME $SNAPSHOT_MOUNT_POINT -o ro \
 	|| die "Mounting snapshot failed."
 
 # Perform cleanup
 cleanup
-
-
-
 
