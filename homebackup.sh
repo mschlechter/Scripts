@@ -15,8 +15,8 @@
 # Begin of configuration section
 #
 
-VOLUME_GROUP="/dev/main-vg"
-VOLUME_NAME="$VOLUME_GROUP/root"
+VOLUME_GROUP="/dev/saturn-vg"
+VOLUME_NAME="$VOLUME_GROUP/home"
 
 SNAPSHOT_NAME="snap"
 SNAPSHOT_VOLUME_NAME="$VOLUME_GROUP/$SNAPSHOT_NAME"
@@ -59,7 +59,7 @@ function cleanup
 	# Remove snapshot volume (when it exists)
 	if $LVDISPLAY | grep -q $SNAPSHOT_VOLUME_NAME; then
 		log "Removing snapshot for volume $VOLUME_NAME"
-		$LVREMOVE -f $VOLUME_NAME \
+		$LVREMOVE -f -v $VOLUME_NAME \
 			|| log "Removing snapshot failed."
 	fi
 }
@@ -71,7 +71,7 @@ $LVCREATE -L $SNAPSHOT_SIZE -s -n $SNAPSHOT_NAME $VOLUME_NAME \
 
 # Mount snapshot filesystem
 log "Mounting snapshot on $SNAPSHOT_MOUNT_POINT"
-$MOUNT $SNAPSHOT_VOLUME_NAME $SNAPSHOT_MOUNT_POINT -o ro \
+$MOUNT $SNAPSHOT_VOLUME_NAME $SNAPSHOT_MOUNT_POINT -o ro,nouuid \
 	|| die "Mounting snapshot failed."
 
 # Perform cleanup
