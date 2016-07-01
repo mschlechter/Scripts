@@ -3,13 +3,6 @@
 # Script which creates a LVM snapshot, mounts it, and then makes a
 # backup of the configured directories.
 #
-# It is recommended to use a logical volume and filesystem dedicated to
-# data. Removing a snapshot of a filesystem that is in use (for example
-# the root filesystem), might cause errors with lvremove.
-#
-# If you have a separate logical volume with one filesystem in it, this
-# script should work just fine.
-#
 
 #
 # Begin of configuration section
@@ -22,6 +15,8 @@ SNAPSHOT_NAME="snap"
 SNAPSHOT_VOLUME_NAME="$VOLUME_GROUP/$SNAPSHOT_NAME"
 SNAPSHOT_MOUNT_POINT="/mnt/snap"
 SNAPSHOT_SIZE="1024M"
+
+TARGET_MOUNT_POINT="/mnt/backup"
 
 LVCREATE=$(which lvcreate)
 LVREMOVE=$(which lvremove)
@@ -49,6 +44,13 @@ function die
 
 function cleanup
 {
+	# Unmount target filesystem (when mounted)
+	if $MOUNTPOINT -q $TARGET_MOUNT_POINT; then
+		log "Unmounting target file system"
+		$UMOUNT $TARGET_MOUNT_POINT \
+			|| log "Unmounting target file system failed."
+	fi
+
 	# Unmount snapshot filesystem (when mounted)
 	if $MOUNTPOINT -q $SNAPSHOT_MOUNT_POINT; then
 		log "Unmounting the snapshot"
@@ -74,6 +76,11 @@ $LVCREATE -L $SNAPSHOT_SIZE -s -n $SNAPSHOT_NAME $VOLUME_NAME \
 log "Mounting snapshot on $SNAPSHOT_MOUNT_POINT"
 $MOUNT $SNAPSHOT_VOLUME_NAME $SNAPSHOT_MOUNT_POINT -o ro,nouuid \
 	|| die "Mounting snapshot failed."
+
+# Mount target filesystem
+log "Mounting target filesystem $TARGET_MOUNT_POINT"
+$MOUNT $TARGET_MOUNT_POINT \
+	|| die "Mounting target filesystem failed."
 
 # Perform cleanup
 cleanup
