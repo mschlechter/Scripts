@@ -16,10 +16,9 @@ SNAPSHOT_VOLUME_NAME="$VOLUME_GROUP/$SNAPSHOT_NAME"
 SNAPSHOT_MOUNT_POINT="/mnt/snap"
 SNAPSHOT_SIZE="1024M"
 
+SOURCE_DIR="/mnt/snap"
 TARGET_MOUNT_POINT="/mnt/backup"
 TARGET_ARCHIVE="$TARGET_MOUNT_POINT/SaturnHomes-$(date +"%Y%m%d").tar.gz"
-
-SOURCE_DIR="/mnt/snap"
 
 LVCREATE=$(which lvcreate)
 LVREMOVE=$(which lvremove)
@@ -85,18 +84,22 @@ $LVCREATE -L $SNAPSHOT_SIZE -s -n $SNAPSHOT_NAME $VOLUME_NAME \
 # Mount snapshot filesystem
 log "Mounting snapshot on $SNAPSHOT_MOUNT_POINT"
 $MOUNT $SNAPSHOT_VOLUME_NAME $SNAPSHOT_MOUNT_POINT -o ro,nouuid \
+	&& log "Snapshot mounted on $SNAPSHOT_MOUNT_POINT" \
 	|| die "Mounting snapshot failed."
 
 # Mount target filesystem
 log "Mounting target filesystem $TARGET_MOUNT_POINT"
 $MOUNT $TARGET_MOUNT_POINT \
+	&& log "Target filesystem mounted on $TARGET_MOUNT_POINT." \
 	|| die "Mounting target filesystem failed."
 
 # Change to the backup source directory
 cd $SOURCE_DIR \
+	&& log "Changed to $SOURCE_DIR" \
 	|| die "Could not change to $SOURCE_DIR"
 
 # Create tar archive
+log "Creating archive $TARGET_ARCHIVE"
 $TAR cfz $TARGET_ARCHIVE $SOURCE_DIR \
 	&& log "Archive $TARGET_ARCHIVE created." \
 	|| die "Failed to create archive $TARGET_ARCHIVE"
