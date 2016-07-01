@@ -58,8 +58,8 @@ function cleanup
 
 	# Remove snapshot volume (when it exists)
 	if $LVDISPLAY | grep -q $SNAPSHOT_VOLUME_NAME; then
-		log "Removing snapshot for volume $VOLUME_NAME"
-		$LVREMOVE -f -v $VOLUME_NAME \
+		log "Removing snapshot volume $SNAPSHOT_VOLUME_NAME"
+		$LVREMOVE -f $SNAPSHOT_VOLUME_NAME \
 			|| log "Removing snapshot failed."
 	fi
 }
@@ -67,6 +67,7 @@ function cleanup
 # Create snapshot volume
 log "Creating snapshot for volume $VOLUME_NAME"
 $LVCREATE -L $SNAPSHOT_SIZE -s -n $SNAPSHOT_NAME $VOLUME_NAME \
+	&& log "Snapshot volume $SNAPSHOT_VOLUME_NAME created." \
 	|| die "Snapshot creation failed."
 
 # Mount snapshot filesystem
@@ -77,3 +78,5 @@ $MOUNT $SNAPSHOT_VOLUME_NAME $SNAPSHOT_MOUNT_POINT -o ro,nouuid \
 # Perform cleanup
 cleanup
 
+# Log backup succeeded
+log "Backup succeeded!"
