@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/bash -
+
 #
 # Script which creates a LVM snapshot, mounts it, and then makes a
 # backup of the configured directories.
@@ -20,6 +21,8 @@ SOURCE_DIR="/mnt/snap"
 TARGET_MOUNT_POINT="/mnt/backup"
 TARGET_ARCHIVE="$TARGET_MOUNT_POINT/SaturnHomes-$(date +"%Y%m%d").tar.gz"
 
+LOG_DATE="False"
+
 LVCREATE=$(which lvcreate)
 LVREMOVE=$(which lvremove)
 LVDISPLAY=$(which lvdisplay)
@@ -36,7 +39,10 @@ CURRENT_DIR=$(pwd)
 
 function log
 {
-	echo "$(date +"%Y%m%d %H:%M:%S") $1"
+	if [ $LOG_DATE = "True" ]; then
+		echo -n "$(date +"%Y%m%d %H:%M:%S") "
+	fi
+	echo "$1"
 }
 
 function die
