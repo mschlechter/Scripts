@@ -1,0 +1,13 @@
+[Unit]
+Description=Home Backup Task
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/marc/Scripts/homebackup.sh
+User=root
+Group=root
+
+[Install]
+WantedBy=default.target
+
