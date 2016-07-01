@@ -17,6 +17,9 @@ SNAPSHOT_MOUNT_POINT="/mnt/snap"
 SNAPSHOT_SIZE="1024M"
 
 TARGET_MOUNT_POINT="/mnt/backup"
+TARGET_ARCHIVE="$TARGET_MOUNT_POINT/SaturnHomes-$(date +"%Y%m%d").tar.gz"
+
+SOURCE_DIR="/mnt/snap"
 
 LVCREATE=$(which lvcreate)
 LVREMOVE=$(which lvremove)
@@ -25,6 +28,8 @@ MOUNT=$(which mount)
 UMOUNT=$(which umount)
 TAR=$(which tar)
 MOUNTPOINT=$(which mountpoint)
+
+CURRENT_DIR=$(pwd)
 
 #
 # End of configuration section
@@ -39,11 +44,16 @@ function die
 {
 	log "$1"
 	cleanup
+	log "There were errors during the backup!"
 	exit 1
 }
 
 function cleanup
 {
+	# Change back to current dir
+	log "Changing back to $CURRENT_DIR"
+	cd $CURRENT_DIR
+
 	# Unmount target filesystem (when mounted)
 	if $MOUNTPOINT -q $TARGET_MOUNT_POINT; then
 		log "Unmounting target file system"
@@ -81,6 +91,15 @@ $MOUNT $SNAPSHOT_VOLUME_NAME $SNAPSHOT_MOUNT_POINT -o ro,nouuid \
 log "Mounting target filesystem $TARGET_MOUNT_POINT"
 $MOUNT $TARGET_MOUNT_POINT \
 	|| die "Mounting target filesystem failed."
+
+# Change to the backup source directory
+cd $SOURCE_DIR \
+	|| die "Could not change to $SOURCE_DIR"
+
+# Create tar archive
+$TAR cfz $TARGET_ARCHIVE $SOURCE_DIR \
+	&& log "Archive $TARGET_ARCHIVE created." \
+	|| die "Failed to create archive $TARGET_ARCHIVE"
 
 # Perform cleanup
 cleanup
