@@ -5,7 +5,7 @@
 #
 
 IPT=$(which iptables)
-
+LOCAL_SUBNET="192.168.2.0/24"
 
 function reset()
 {
@@ -18,15 +18,25 @@ function reset()
 	$IPT -t mangle -F
 	$IPT -t mangle -X
 	
-
-
-
+	$IPT -P INPUT ACCEPT
+	$IPT -P OUTPUT ACCEPT
+	$IPT -P FORWARD ACCEPT
 }
 
 function start()
 {
 	reset
 	echo "Starting firewall..."
+
+	$IPT -P INPUT DROP
+	$IPT -P FORWARD DROP
+	$IPT -P OUTPUT ACCEPT
+
+	$IPT -A INPUT -m state --state NEW,ESTABLISHED -j ACCEPT
+
+	$IPT -A INPUT -s $LOCAL_SUBNET -m state --state NEW -p tcp --dport 22 -j ACCEPT
+
+
 }
 
 function status()
@@ -36,7 +46,7 @@ function status()
 
 # Check arguments
 if [ $# -ne 1 ]; then
-	echo "Please specify action. Possible options are start and reset."
+	echo "Please specify action. Possible options are start, reset and status."
 	exit 0
 fi
 
