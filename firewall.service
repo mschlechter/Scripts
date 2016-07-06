@@ -1,0 +1,13 @@
+[Unit]
+Description=Custom firewall
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/marc/Scripts/firewall.sh start
+User=root
+Group=root
+
+[Install]
+WantedBy=default.target
+
