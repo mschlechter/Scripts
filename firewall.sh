@@ -11,6 +11,7 @@ function reset()
 {
 	echo "Clearing firewall..."
 
+	# Flush all rules
 	$IPT -F
 	$IPT -X
 	$IPT -t nat -F
@@ -18,6 +19,7 @@ function reset()
 	$IPT -t mangle -F
 	$IPT -t mangle -X
 	
+	# Allow everything
 	$IPT -P INPUT ACCEPT
 	$IPT -P OUTPUT ACCEPT
 	$IPT -P FORWARD ACCEPT
@@ -28,19 +30,28 @@ function start()
 	reset
 	echo "Starting firewall..."
 
+	# Set default policies
 	$IPT -P INPUT DROP
 	$IPT -P FORWARD DROP
 	$IPT -P OUTPUT ACCEPT
 
-	$IPT -A INPUT -m state --state NEW,ESTABLISHED -j ACCEPT
+	# Accept incoming packets for existing connections
+	$IPT -A INPUT -m state --state ESTABLISHED -j ACCEPT
 
+	# Allow SSH from local subnet
 	$IPT -A INPUT -s $LOCAL_SUBNET -m state --state NEW -p tcp --dport 22 -j ACCEPT
 
+	# Allow Cockpit from local subnet
+	$IPT -A INPUT -s $LOCAL_SUBNET -m state --state NEW -p tcp --dport 9090 -j ACCEPT
+
+	# Allow GO Git Service from local subnet
+	$IPT -A INPUT -s $LOCAL_SUBNET -m state --state NEW -p tcp --dport 3000 -j ACCEPT
 
 }
 
 function status()
 {
+	# Display status
 	$IPT -L -n -v
 }
 
