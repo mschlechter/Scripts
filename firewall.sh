@@ -4,6 +4,8 @@
 # Simple firewall script
 #
 
+# NOTE: Make sure you disable your Linux distribution's firewall first, before using this one.
+
 IPT=$(which iptables)
 LOCAL_SUBNET="192.168.2.0/24"
 
