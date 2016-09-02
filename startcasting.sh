@@ -14,8 +14,6 @@ xset -dpms # disable DPMS (Energy Star) features.
 xset s off # disable screen saver
 xset s noblank # don't blank the video device
 
-unclutter # kill de mouse pointer
-
-matchbox-window-manager & 
+matchbox-window-manager & unclutter & 
 midori -e Fullscreen -a $URL
 
