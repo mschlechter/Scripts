@@ -5,8 +5,14 @@
 # Zorg ervoor dat midori, unclutter en matchbox geinstalleerd zijn.
 #
 
-# Zet hier de URL
-URL=http://ncsilfhout.autotaal.biz:8092/webplayer/imageviewer.aspx?nodeid=1
+# URL wordt geladen uit /boot/easycast.url.txt bestand
+
+URL=""
+
+if [ -e "/boot/easycast.url.txt" ]
+then
+	URL=$(cat /boot/easycast.url.txt)
+fi
 
 # Laat de rest van het script zijn werk doen
 
