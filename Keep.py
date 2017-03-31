@@ -1,3 +1,9 @@
+#
+# keep.py
+#
+# Simple script which creates an incremental rsync backup tree using --link-dest.
+#
+
 import os
 import subprocess
 import sys
