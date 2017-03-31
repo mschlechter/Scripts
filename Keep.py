@@ -92,7 +92,10 @@ try:
     # Find previous backup
     #
 
-    backup_dirs = [s for s in os.listdir(destination) if not os.path.isfile(os.path.join(destination, s)) and os.path.join(destination, s) != current_destination and os.path.join(destination, s) != log_dir]
+    backup_dirs = [s for s in os.listdir(destination) 
+        if not os.path.isfile(os.path.join(destination, s)) 
+        and os.path.join(destination, s) != current_destination 
+        and os.path.join(destination, s) != log_dir]
     backup_dirs.sort(key=lambda s: os.path.getmtime(os.path.join(destination, s)), reverse=True)
 
     last_backup_found = False
