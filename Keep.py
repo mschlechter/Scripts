@@ -7,6 +7,7 @@ import time
 # Prepare logger
 #
 
+current_log = None
 log_entries = []
 
 def log(message):
@@ -14,7 +15,6 @@ def log(message):
     print(message)
 
 try:
-
 
     #
     # Parse arguments
@@ -142,14 +142,18 @@ try:
 
     log("Backup completed successfully at " + time.strftime("%T"))
 
-except:
+except SystemExit as e:
 
-    e = sys.exc_info()[0]
+    log("")
+
+except Exception as e:
+
     log("An error has occurred : %s" % e)
 
 finally:
 
     # Write log
-    with open(current_log, 'w') as cl:
-        for log_item in log_entries:
-            cl.write("%s\n" % log_item)
+    if current_log is not None:
+        with open(current_log, 'w') as cl:
+            for log_item in log_entries:
+                cl.write("%s\n" % log_item)
