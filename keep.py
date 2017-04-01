@@ -125,7 +125,7 @@ def backup(source, destination, retention, force):
         # Purge old backups
         #
 
-        if len(backup_dirs) >= retention:
+        if len(backup_dirs) >= retention and retention > 0:
             for i in range(retention - 1, len(backup_dirs)):
                 logger.log("Deleting backup : " + backup_dirs[i])
                 shutil.rmtree(os.path.join(destination, backup_dirs[i]))
