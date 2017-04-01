@@ -117,10 +117,10 @@ def backup(source, destination, retention, force):
         # Find previous backup
         #
 
-        backup_dirs = [s for s in os.listdir(destination) 
-            if not os.path.isfile(os.path.join(destination, s)) 
-            and os.path.join(destination, s) != current_destination 
-            and os.path.join(destination, s) != log_dir]
+        backup_dirs = [s for s in os.listdir(destination)
+                       if not os.path.isfile(os.path.join(destination, s))
+                       and os.path.join(destination, s) != current_destination
+                       and os.path.join(destination, s) != log_dir]
         backup_dirs.sort(key=lambda s: os.path.getmtime(os.path.join(destination, s)), reverse=True)
 
         last_backup_found = False
@@ -173,18 +173,18 @@ def backup(source, destination, retention, force):
 
         return True
 
-    except Exception as e:
+    except Exception as exception:
 
-        log("An error has occurred : %s" % e)
+        log("An error has occurred : %s" % exception)
         return False
 
     finally:
 
         # Write log
         if current_log is not None:
-            with open(current_log, 'w') as cl:
+            with open(current_log, 'w') as current_log_file:
                 for log_item in log_entries:
-                    cl.write("%s\n" % log_item)
+                    current_log_file.write("%s\n" % log_item)
 
 
 #
