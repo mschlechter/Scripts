@@ -5,10 +5,6 @@ import subprocess
 import sys
 import time
 
-#
-# Prepare logger
-#
-
 class Logger:
     """Logger class for logging messages"""
     log_entries = []
@@ -19,11 +15,7 @@ class Logger:
         print(message)
 
 def main():
-    """Main function when run directly"""
-
-    #
-    # Parse arguments
-    #
+    """Main function when run directly. Parses arguments and runs the backup routine."""
 
     import argparse
     parser = argparse.ArgumentParser(
@@ -50,7 +42,6 @@ def backup(source, destination, retention, force):
     """Backup function which does the actual work"""
 
     logger = Logger()
-
     current_log = None
 
     try:
