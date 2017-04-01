@@ -9,13 +9,14 @@ import time
 # Prepare logger
 #
 
-current_log = None
-log_entries = []
+class Logger:
+    """Logger class for logging messages"""
+    log_entries = []
 
-def log(message):
-    global log_entries
-    log_entries.append(message)
-    print(message)
+    def log(self, message):
+        """Log message"""
+        self.log_entries.append(message)
+        print(message)
 
 def main():
     """Main function when run directly"""
@@ -48,11 +49,9 @@ def main():
 def backup(source, destination, retention, force):
     """Backup function which does the actual work"""
 
-    global current_log
-    global log_entries
+    logger = Logger()
 
     current_log = None
-    log_entries = []
 
     try:
 
@@ -61,22 +60,22 @@ def backup(source, destination, retention, force):
         #
 
         if not os.path.isdir(source):
-            log("Source directory does not exist!")
+            logger.log("Source directory does not exist!")
             return False
 
         if not os.path.isdir(destination):
-            log("Destination directory does not exist!")
+            logger.log("Destination directory does not exist!")
             return False
 
         #
         # Print summary
         #
 
-        log("Source      : " + source)
-        log("Destination : " + destination)
-        log("Retention   : " + str(retention))
+        logger.log("Source      : " + source)
+        logger.log("Destination : " + destination)
+        logger.log("Retention   : " + str(retention))
         if force:
-            log("Overwriting today's backup if it exists!")
+            logger.log("Overwriting today's backup if it exists!")
 
         #
         # Check and create destination directory for today
@@ -85,11 +84,11 @@ def backup(source, destination, retention, force):
         current_destination = os.path.join(destination, time.strftime("%Y%m%d"))
 
         if os.path.isdir(current_destination) and not force:
-            log("Backup for today already exists!")
+            logger.log("Backup for today already exists!")
             return False
 
         if not os.path.isdir(current_destination):
-            log("Creating directory " + current_destination)
+            logger.log("Creating directory " + current_destination)
             os.makedirs(current_destination)
 
 
@@ -99,14 +98,14 @@ def backup(source, destination, retention, force):
 
         log_dir = os.path.join(destination, "Logs")
         if not os.path.isdir(log_dir):
-            log("Creating directory " + log_dir)
+            logger.log("Creating directory " + log_dir)
             os.makedirs(log_dir)
 
         current_log = os.path.join(log_dir, time.strftime("%Y%m%d") + "_keep.log")
         current_log_rsync = os.path.join(log_dir, time.strftime("%Y%m%d") + "_rsync.log")
 
-        log("Log file : " + current_log)
-        log("Log file (rsync) : " + current_log_rsync)
+        logger.log("Log file : " + current_log)
+        logger.log("Log file (rsync) : " + current_log_rsync)
 
         #
         # Find previous backup
@@ -126,9 +125,9 @@ def backup(source, destination, retention, force):
             last_backup_dir = os.path.join(destination, backup_dirs[0])
 
         if last_backup_found:
-            log("Previous backup found : " + last_backup_dir)
+            logger.log("Previous backup found : " + last_backup_dir)
         else:
-            log("No previous backup found.")
+            logger.log("No previous backup found.")
 
         #
         # Compose rsync command
@@ -139,21 +138,21 @@ def backup(source, destination, retention, force):
         if last_backup_found:
 
             # Incremental backup
-            log("Preparing incremental backup...")
+            logger.log("Preparing incremental backup...")
             rsync_args = ["rsync", "-av", "--delete", "--link-dest",
                           last_backup_dir, source, current_destination]
 
         else:
 
             # Full backup
-            log("Preparing full backup...")
+            logger.log("Preparing full backup...")
             rsync_args = ["rsync", "-av", "--delete", source, current_destination]
 
         #
         # Run rsync command and redirect output to rsync log file
         #
 
-        log("Backup started at " + time.strftime("%T"))
+        logger.log("Backup started at " + time.strftime("%T"))
 
         rsync_result = 0
 
@@ -161,16 +160,16 @@ def backup(source, destination, retention, force):
             rsync_result = subprocess.call(rsync_args, stdout=clr, stderr=clr)
 
         if rsync_result > 0:
-            log("There were errors during the backup operation!")
+            logger.log("There were errors during the backup operation!")
             return False
 
-        log("Backup completed successfully at " + time.strftime("%T"))
+        logger.log("Backup completed successfully at " + time.strftime("%T"))
 
         return True
 
     except Exception as exception:
 
-        log("An error has occurred : %s" % exception)
+        logger.log("An error has occurred : %s" % exception)
         return False
 
     finally:
@@ -178,7 +177,7 @@ def backup(source, destination, retention, force):
         # Write log
         if current_log is not None:
             with open(current_log, 'w') as current_log_file:
-                for log_item in log_entries:
+                for log_item in logger.log_entries:
                     current_log_file.write("%s\n" % log_item)
 
 
