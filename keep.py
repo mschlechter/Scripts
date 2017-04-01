@@ -18,10 +18,11 @@ current_log = None
 log_entries = []
 
 def log(message):
+    global log_entries
     log_entries.append(message)
     print(message)
 
-try:
+def main():
 
     #
     # Parse arguments
@@ -42,128 +43,148 @@ try:
 
     if args.retention is not None:
         retention = args.retention
-
-    #
-    # Check if source and destination directory exist
-    #
-
-    if not os.path.isdir(source):
-        log("Source directory does not exist!")
+    
+    if not backup(source, destination, retention, force):
         sys.exit(1)
 
-    if not os.path.isdir(destination):
-        log("Destination directory does not exist!")
-        sys.exit(1)
+def backup(source, destination, retention, force):
 
-    #
-    # Print summary
-    #
+    global current_log
+    global log_entries
 
-    log("Source      : " + source)
-    log("Destination : " + destination)
-    log("Retention   : " + str(retention))
-    if force:
-        log("Overwriting today's backup if it exists!")
+    current_log = None
+    log_entries = []
 
-    #
-    # Check and create destination directory for today
-    #
+    try:
 
-    current_destination = os.path.join(destination, time.strftime("%Y%m%d"))
+        #
+        # Check if source and destination directory exist
+        #
 
-    if os.path.isdir(current_destination) and not force:
-        log("Backup for today already exists!")
-        sys.exit(1)
+        if not os.path.isdir(source):
+            log("Source directory does not exist!")
+            return False
 
-    if not os.path.isdir(current_destination):
-        log("Creating directory " + current_destination)
-        os.makedirs(current_destination)
+        if not os.path.isdir(destination):
+            log("Destination directory does not exist!")
+            return False
+
+        #
+        # Print summary
+        #
+
+        log("Source      : " + source)
+        log("Destination : " + destination)
+        log("Retention   : " + str(retention))
+        if force:
+            log("Overwriting today's backup if it exists!")
+
+        #
+        # Check and create destination directory for today
+        #
+
+        current_destination = os.path.join(destination, time.strftime("%Y%m%d"))
+
+        if os.path.isdir(current_destination) and not force:
+            log("Backup for today already exists!")
+            return False
+
+        if not os.path.isdir(current_destination):
+            log("Creating directory " + current_destination)
+            os.makedirs(current_destination)
 
 
-    #
-    # Prepare log directory and files
-    #
+        #
+        # Prepare log directory and files
+        #
 
-    log_dir = os.path.join(destination, "Logs")
-    if not os.path.isdir(log_dir):
-        log("Creating directory " + log_dir)
-        os.makedirs(log_dir)
+        log_dir = os.path.join(destination, "Logs")
+        if not os.path.isdir(log_dir):
+            log("Creating directory " + log_dir)
+            os.makedirs(log_dir)
 
-    current_log = os.path.join(log_dir, time.strftime("%Y%m%d") + "_keep.log")
-    current_log_rsync = os.path.join(log_dir, time.strftime("%Y%m%d") + "_rsync.log")
+        current_log = os.path.join(log_dir, time.strftime("%Y%m%d") + "_keep.log")
+        current_log_rsync = os.path.join(log_dir, time.strftime("%Y%m%d") + "_rsync.log")
 
-    log("Log file : " + current_log)
-    log("Log file (rsync) : " + current_log_rsync)
+        log("Log file : " + current_log)
+        log("Log file (rsync) : " + current_log_rsync)
 
-    #
-    # Find previous backup
-    #
+        #
+        # Find previous backup
+        #
 
-    backup_dirs = [s for s in os.listdir(destination) 
-        if not os.path.isfile(os.path.join(destination, s)) 
-        and os.path.join(destination, s) != current_destination 
-        and os.path.join(destination, s) != log_dir]
-    backup_dirs.sort(key=lambda s: os.path.getmtime(os.path.join(destination, s)), reverse=True)
+        backup_dirs = [s for s in os.listdir(destination) 
+            if not os.path.isfile(os.path.join(destination, s)) 
+            and os.path.join(destination, s) != current_destination 
+            and os.path.join(destination, s) != log_dir]
+        backup_dirs.sort(key=lambda s: os.path.getmtime(os.path.join(destination, s)), reverse=True)
 
-    last_backup_found = False
-    last_backup_dir = None
+        last_backup_found = False
+        last_backup_dir = None
 
-    if len(backup_dirs) > 0:
-        last_backup_found = True
-        last_backup_dir = os.path.join(destination, backup_dirs[0])
+        if len(backup_dirs) > 0:
+            last_backup_found = True
+            last_backup_dir = os.path.join(destination, backup_dirs[0])
 
-    if last_backup_found:
-        log("Previous backup found : " + last_backup_dir)
-    else:
-        log("No previous backup found.")
+        if last_backup_found:
+            log("Previous backup found : " + last_backup_dir)
+        else:
+            log("No previous backup found.")
 
-    #
-    # Compose rsync command
-    #
+        #
+        # Compose rsync command
+        #
 
-    rsync_args = []
+        rsync_args = []
 
-    if last_backup_found:
+        if last_backup_found:
 
-        # Incremental backup
-        log("Preparing incremental backup...")
-        rsync_args = ["rsync", "-av", "--delete", "--link-dest", last_backup_dir, source, current_destination]
+            # Incremental backup
+            log("Preparing incremental backup...")
+            rsync_args = ["rsync", "-av", "--delete", "--link-dest", last_backup_dir, source, current_destination]
 
-    else:
+        else:
 
-        # Full backup
-        log("Preparing full backup...")
-        rsync_args = ["rsync", "-av", "--delete", source, current_destination]
+            # Full backup
+            log("Preparing full backup...")
+            rsync_args = ["rsync", "-av", "--delete", source, current_destination]
 
-    #
-    # Run rsync command and redirect output to rsync log file
-    #
+        #
+        # Run rsync command and redirect output to rsync log file
+        #
 
-    log("Backup started at " + time.strftime("%T"))
+        log("Backup started at " + time.strftime("%T"))
 
-    rsync_result = 0
+        rsync_result = 0
 
-    with open(current_log_rsync, 'w') as clr:
-        rsync_result = subprocess.call(rsync_args, stdout=clr, stderr=clr)
+        with open(current_log_rsync, 'w') as clr:
+            rsync_result = subprocess.call(rsync_args, stdout=clr, stderr=clr)
 
-    if rsync_result > 0:
-        log("There were errors during the backup operation!")
-        sys.exit(1)
+        if rsync_result > 0:
+            log("There were errors during the backup operation!")
+            return False
 
-    log("Backup completed successfully at " + time.strftime("%T"))
+        log("Backup completed successfully at " + time.strftime("%T"))
 
-except SystemExit as e:
+        return True
 
-    log("")
+    except Exception as e:
 
-except Exception as e:
+        log("An error has occurred : %s" % e)
+        return False
 
-    log("An error has occurred : %s" % e)
+    finally:
 
-finally:
+        # Write log
+        if current_log is not None:
+            with open(current_log, 'w') as cl:
+                for log_item in log_entries:
+                    cl.write("%s\n" % log_item)
 
-    # Write log
-    if current_log is not None:
-        with open(current_log, 'w') as cl:
-            for log_item in log_entries:
-                cl.write("%s\n" % log_item)
+
+#
+# When being run directly, start main()
+#
+
+if __name__ == "__main__":
+    main()
