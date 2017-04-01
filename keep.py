@@ -1,6 +1,7 @@
 """ Simple script which creates an incremental rsync backup tree using --link-dest. """
 
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -119,6 +120,15 @@ def backup(source, destination, retention, force):
             logger.log("Previous backup found : " + last_backup_dir)
         else:
             logger.log("No previous backup found.")
+
+        #
+        # Purge old backups
+        #
+
+        if len(backup_dirs) >= retention:
+            for i in range(retention - 1, len(backup_dirs)):
+                logger.log("Deleting backup : " + backup_dirs[i])
+                shutil.rmtree(os.path.join(destination, backup_dirs[i]))
 
         #
         # Compose rsync command
