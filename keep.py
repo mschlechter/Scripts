@@ -23,17 +23,20 @@ def log(message):
     print(message)
 
 def main():
+    """Main function when run directly"""
 
     #
     # Parse arguments
     #
 
     import argparse
-    parser = argparse.ArgumentParser(description="keep a time machine like history of a source directory")
+    parser = argparse.ArgumentParser(
+        description="keep a time machine like history of a source directory")
     parser.add_argument("source", help="source directory for backup")
     parser.add_argument("destination", help="destination directory for backup")
     parser.add_argument("-r", "--retention", help="number of backups to keep. Default is 7")
-    parser.add_argument("-f", "--force", help="overwrite today's backup if it exists", action="store_true")
+    parser.add_argument("-f", "--force",
+                        help="overwrite today's backup if it exists", action="store_true")
     args = parser.parse_args()
 
     source = args.source
@@ -43,11 +46,12 @@ def main():
 
     if args.retention is not None:
         retention = args.retention
-    
+
     if not backup(source, destination, retention, force):
         sys.exit(1)
 
 def backup(source, destination, retention, force):
+    """Backup function which does the actual work"""
 
     global current_log
     global log_entries
@@ -141,7 +145,8 @@ def backup(source, destination, retention, force):
 
             # Incremental backup
             log("Preparing incremental backup...")
-            rsync_args = ["rsync", "-av", "--delete", "--link-dest", last_backup_dir, source, current_destination]
+            rsync_args = ["rsync", "-av", "--delete", "--link-dest",
+                          last_backup_dir, source, current_destination]
 
         else:
 
