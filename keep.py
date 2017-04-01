@@ -1,9 +1,4 @@
-#!/usr/bin/env python3
-# 
-# keep.py
-#
-# Simple script which creates an incremental rsync backup tree using --link-dest.
-#
+""" Simple script which creates an incremental rsync backup tree using --link-dest. """
 
 import os
 import subprocess
