@@ -5,12 +5,13 @@ import shutil
 import subprocess
 import sys
 import time
+from typing import List
 
 class Logger:
     """Logger class for logging messages"""
     log_entries = []
 
-    def log(self, message):
+    def log(self, message: str):
         """Log message"""
         self.log_entries.append(message)
         print(message)
@@ -42,7 +43,7 @@ def main():
     if not backup(source, destination, retention, force, exclude):
         sys.exit(1)
 
-def backup(source, destination, retention, force, exclude):
+def backup(source: str, destination: str, retention: int, force: bool, exclude: List[str]):
     """Backup function which does the actual work"""
 
     logger = Logger()
@@ -154,7 +155,7 @@ def backup(source, destination, retention, force, exclude):
         if exclude is not None:
             for folder in exclude:
                 rsync_args.append("--exclude")
-                rsync_args.append(folder)
+                rsync_args.append("'%s'" % folder)
 
         rsync_args.append(source)
         rsync_args.append(current_destination)
