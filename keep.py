@@ -7,6 +7,11 @@ import sys
 import time
 from typing import List
 
+MIN_PYTHON = (3, 5)
+if sys.version_info < MIN_PYTHON:
+    print("This script requires Python version 3.5")
+    sys.exit(1)
+
 class Logger:
     """Logger class for logging messages"""
     log_entries = []
