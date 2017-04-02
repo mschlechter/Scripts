@@ -26,20 +26,23 @@ def main():
     parser.add_argument("-r", "--retention", help="number of backups to keep. Default is 14")
     parser.add_argument("-f", "--force",
                         help="overwrite today's backup if it exists", action="store_true")
+    parser.add_argument("--exclude", help="exclude directory from backup. Use relative path!",
+                        action="append")
     args = parser.parse_args()
 
     source = args.source
     destination = args.destination
     retention = 14
     force = args.force
+    exclude = args.exclude
 
     if args.retention is not None:
         retention = args.retention
 
-    if not backup(source, destination, retention, force):
+    if not backup(source, destination, retention, force, exclude):
         sys.exit(1)
 
-def backup(source, destination, retention, force):
+def backup(source, destination, retention, force, exclude):
     """Backup function which does the actual work"""
 
     logger = Logger()
@@ -134,20 +137,30 @@ def backup(source, destination, retention, force):
         # Compose rsync command
         #
 
+        if last_backup_found:
+            logger.log("Preparing incremental backup...")
+        else:
+            logger.log("Preparing full backup...")
+
         rsync_args = []
+        rsync_args.append("rsync")
+        rsync_args.append("-av")
+        rsync_args.append("--delete")
 
         if last_backup_found:
+            rsync_args.append("--link-dest")
+            rsync_args.append(last_backup_dir)
 
-            # Incremental backup
-            logger.log("Preparing incremental backup...")
-            rsync_args = ["rsync", "-av", "--delete", "--link-dest",
-                          last_backup_dir, source, current_destination]
+        if exclude is not None:
+            for folder in exclude:
+                rsync_args.append("--exclude")
+                rsync_args.append(folder)
 
-        else:
+        rsync_args.append(source)
+        rsync_args.append(current_destination)
 
-            # Full backup
-            logger.log("Preparing full backup...")
-            rsync_args = ["rsync", "-av", "--delete", source, current_destination]
+        logger.log("Composed rsync command:")
+        logger.log(' '.join(rsync_args))
 
         #
         # Run rsync command and redirect output to rsync log file
