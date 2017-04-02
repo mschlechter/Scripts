@@ -23,14 +23,14 @@ def main():
         description="keep a time machine like history of a source directory")
     parser.add_argument("source", help="source directory for backup")
     parser.add_argument("destination", help="destination directory for backup")
-    parser.add_argument("-r", "--retention", help="number of backups to keep. Default is 7")
+    parser.add_argument("-r", "--retention", help="number of backups to keep. Default is 14")
     parser.add_argument("-f", "--force",
                         help="overwrite today's backup if it exists", action="store_true")
     args = parser.parse_args()
 
     source = args.source
     destination = args.destination
-    retention = 7
+    retention = 14
     force = args.force
 
     if args.retention is not None:
