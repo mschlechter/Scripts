@@ -157,7 +157,7 @@ def backup(source: str, destination: str, retention: int, force: bool, exclude: 
                 rsync_args.append("--exclude")
                 rsync_args.append("'%s'" % folder)
 
-        if source.find("@"):
+        if source.find("@") > -1:
             rsync_args.append("ssh")
 
         rsync_args.append(source)
