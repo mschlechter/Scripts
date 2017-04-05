@@ -55,7 +55,7 @@ def backup(source: str, destination: str, retention: int, force: bool, exclude: 
         # Check if source and destination directory exist
         #
 
-        if not os.path.isdir(source):
+        if source.find("@") == -1 and not os.path.isdir(source):
             logger.log("Source directory does not exist!")
             return False
 
@@ -156,6 +156,9 @@ def backup(source: str, destination: str, retention: int, force: bool, exclude: 
             for folder in exclude:
                 rsync_args.append("--exclude")
                 rsync_args.append("'%s'" % folder)
+
+        if source.find("@"):
+            rsync_args.append("ssh")
 
         rsync_args.append(source)
         rsync_args.append(current_destination)
