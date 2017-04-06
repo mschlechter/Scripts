@@ -5,13 +5,12 @@ import shutil
 import subprocess
 import sys
 import time
-from typing import List
 
 class Logger:
     """Logger class for logging messages"""
     log_entries = []
 
-    def log(self, message: str):
+    def log(self, message):
         """Log message"""
         self.log_entries.append(message)
         print(message)
@@ -27,7 +26,7 @@ def main():
     parser.add_argument("-r", "--retention", help="number of backups to keep. Default is 14")
     parser.add_argument("-f", "--force",
                         help="overwrite today's backup if it exists", action="store_true")
-    parser.add_argument("--exclude", help="exclude directory from backup. Use relative path!",
+    parser.add_argument("--exclude", help="exclude pattern from backup. Use relative path!",
                         action="append")
     args = parser.parse_args()
 
@@ -35,15 +34,15 @@ def main():
     destination = args.destination
     retention = 14
     force = args.force
-    exclude = args.exclude
+    exclude_patterns = args.exclude
 
     if args.retention is not None:
         retention = args.retention
 
-    if not backup(source, destination, retention, force, exclude):
+    if not backup(source, destination, retention, force, exclude_patterns):
         sys.exit(1)
 
-def backup(source: str, destination: str, retention: int, force: bool, exclude: List[str]):
+def backup(source, destination, retention, force, exclude_patterns):
     """Backup function which does the actual work"""
 
     logger = Logger()
@@ -152,13 +151,10 @@ def backup(source: str, destination: str, retention: int, force: bool, exclude: 
             rsync_args.append("--link-dest")
             rsync_args.append(last_backup_dir)
 
-        if exclude is not None:
-            for folder in exclude:
+        if exclude_patterns is not None:
+            for exclude_pattern in exclude_patterns:
                 rsync_args.append("--exclude")
-                rsync_args.append("'%s'" % folder)
-
-        if source.find("@") > -1:
-            rsync_args.append("ssh")
+                rsync_args.append("'%s'" % exclude_pattern)
 
         rsync_args.append(source)
         rsync_args.append(current_destination)
