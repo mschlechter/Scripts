@@ -154,7 +154,7 @@ def backup(source, destination, retention, force, exclude_patterns):
         if exclude_patterns is not None:
             for exclude_pattern in exclude_patterns:
                 rsync_args.append("--exclude")
-                rsync_args.append("'%s'" % exclude_pattern)
+                rsync_args.append(exclude_pattern)
 
         rsync_args.append(source)
         rsync_args.append(current_destination)
