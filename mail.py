@@ -2,10 +2,9 @@
 
 import configparser
 import os
-import shutil
-import subprocess
-import sys
-import time
+import smtplib
+
+from email.mime.multipart import MIMEMultipart
 
 class Logger:
     """Logger class for logging messages"""
@@ -63,7 +62,14 @@ def sendmail(config_file, recipient, subject, body):
         logger.log("SMTP Password    : " + smtp_password)
         logger.log("Mail from        : " + mail_from)
 
-        
+        message = MIMEMultipart()
+        message['Subject'] = subject
+        message['To'] = recipient
+        message['From'] = mail_from
+
+        smtp = smtplib.SMTP(smtp_server, smtp_server_port)
+        smtp.sendmail(mail_from, [recipient], message.as_string())
+        smtp.quit()
 
         return True
 
