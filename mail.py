@@ -48,7 +48,7 @@ def sendmail(config_file, recipient, subject, body):
 
         smtp_server = config.get("smtp", "server")
         smtp_server_port = config.getint("smtp", "server_port")
-        smtp_usessl = config.getboolean("smtp", "usessl")
+        smtp_usetls = config.getboolean("smtp", "usetls")
         smtp_useauth = config.getboolean("smtp", "useauth")
         smtp_username = config.get("smtp", "username")
         smtp_password = config.get("smtp", "password")
@@ -56,10 +56,10 @@ def sendmail(config_file, recipient, subject, body):
 
         logger.log("SMTP Server      : " + smtp_server)
         logger.log("SMTP Server port : " + str(smtp_server_port))
-        logger.log("SMTP Use SSL     : " + str(smtp_usessl))
+        logger.log("SMTP Use TLS     : " + str(smtp_usetls))
         logger.log("SMTP Use auth    : " + str(smtp_useauth))
         logger.log("SMTP Username    : " + smtp_username)
-        logger.log("SMTP Password    : " + smtp_password)
+        logger.log("SMTP Password    : " + "*" * len(smtp_password))
         logger.log("Mail from        : " + mail_from)
 
         message = MIMEMultipart()
@@ -68,6 +68,12 @@ def sendmail(config_file, recipient, subject, body):
         message['From'] = mail_from
 
         smtp = smtplib.SMTP(smtp_server, smtp_server_port)
+        if smtp_usetls:
+            smtp.starttls()
+
+        if smtp_useauth:
+            smtp.login(smtp_username, smtp_password)
+
         smtp.sendmail(mail_from, [recipient], message.as_string())
         smtp.quit()
 
