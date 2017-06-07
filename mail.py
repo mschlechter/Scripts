@@ -5,6 +5,7 @@ import os
 import smtplib
 
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 class Logger:
     """Logger class for logging messages"""
@@ -24,13 +25,15 @@ def main():
     parser.add_argument("-c", "--config", help="configuration file", required=True)
     parser.add_argument("-to", "--to", help="recipient", required=True)
     parser.add_argument("-s", "--subject", help="subject", required=True)
-    parser.add_argument("-b", "--body", help="message body", required=True)
+    parser.add_argument("--text", help="message text", required=True)
+    parser.add_argument('--html', dest='html', action='store_true')
+    parser.set_defaults(html=False)
 
     args = parser.parse_args()
 
-    sendmail(args.config, args.to, args.subject, args.body)
+    sendmail(args.config, args.to, args.subject, args.text, args.html)
 
-def sendmail(config_file, recipient, subject, body):
+def sendmail(config_file, recipient, subject, text, html):
     """Send mail function"""
 
     logger = Logger()
@@ -54,18 +57,26 @@ def sendmail(config_file, recipient, subject, body):
         smtp_password = config.get("smtp", "password")
         mail_from = config.get("profile", "from")
 
+        logger.log("[SMTP configuration]")
         logger.log("SMTP Server      : " + smtp_server)
         logger.log("SMTP Server port : " + str(smtp_server_port))
         logger.log("SMTP Use TLS     : " + str(smtp_usetls))
         logger.log("SMTP Use auth    : " + str(smtp_useauth))
         logger.log("SMTP Username    : " + smtp_username)
         logger.log("SMTP Password    : " + "*" * len(smtp_password))
+        logger.log("")
+        logger.log("[Message configuration]")
         logger.log("Mail from        : " + mail_from)
+        logger.log("Recipient        : " + recipient)
+        logger.log("Subject          : " + subject)
+        logger.log("Test is HTML     : " + str(html))
 
         message = MIMEMultipart()
         message['Subject'] = subject
         message['To'] = recipient
         message['From'] = mail_from
+
+        message.attach(MIMEText(text, 'html' if html else 'plain'))
 
         smtp = smtplib.SMTP(smtp_server, smtp_server_port)
         if smtp_usetls:
