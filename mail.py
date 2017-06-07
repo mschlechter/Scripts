@@ -48,9 +48,22 @@ def sendmail(config_file, recipient, subject, body):
         config.read(config_file)
 
         smtp_server = config.get("smtp", "server")
+        smtp_server_port = config.getint("smtp", "server_port")
+        smtp_usessl = config.getboolean("smtp", "usessl")
+        smtp_useauth = config.getboolean("smtp", "useauth")
+        smtp_username = config.get("smtp", "username")
+        smtp_password = config.get("smtp", "password")
+        mail_from = config.get("profile", "from")
 
-        logger.log(smtp_server)
+        logger.log("SMTP Server      : " + smtp_server)
+        logger.log("SMTP Server port : " + str(smtp_server_port))
+        logger.log("SMTP Use SSL     : " + str(smtp_usessl))
+        logger.log("SMTP Use auth    : " + str(smtp_useauth))
+        logger.log("SMTP Username    : " + smtp_username)
+        logger.log("SMTP Password    : " + smtp_password)
+        logger.log("Mail from        : " + mail_from)
 
+        
 
         return True
 
